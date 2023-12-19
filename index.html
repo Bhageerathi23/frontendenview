@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Driver Monitoring Alerts</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Driver Monitoring Alerts</h1>
+    <div class="search-section">
+      <input type="text" id="freeTextSearch" placeholder="Search">
+      <select id="vehicleSearch">
+        <!-- Dropdown will be populated dynamically -->
+      </select>
+      <input type="date" id="startDate" placeholder="Start Date" value="2023-03-01">
+      <input type="date" id="endDate" placeholder="End Date" value="2023-03-02">
+      <button onclick="searchAlerts()">Search</button>
+    </div>
+  </header>
+  
+  <main id="alertsContainer">
+    <!-- Display area for alerts -->
+    <!-- Alerts will be populated dynamically -->
+  </main>
+
+  <script>
+    let alerts = [
+      {
+        vehicleId: '1'
+      },
+      {
+        vehicleId: '2'
+      },
+      {
+        vehicleId: '3'
+      }
+      // ... Add more alerts here if needed
+    ];
+
+    const alertMessages = {
+      '1': 'Unsafe driving\nDriver: Ramesh/KA12A3436',
+      '2': 'Distracted driver March 2023 21:30\nDriver: Suresh/MH1243456',
+      '3': 'Speeding\nDriver: John/XYZ123'
+      // ... Add more alert messages for other vehicles here if needed
+    };
+
+    function searchAlerts() {
+      const freeText = document.getElementById('freeTextSearch').value.toLowerCase();
+      const vehicleId = document.getElementById('vehicleSearch').value;
+      const startDate = new Date(document.getElementById('startDate').value);
+      const endDate = new Date(document.getElementById('endDate').value);
+
+      const filteredAlerts = alerts
+        .filter(alert => alert.vehicleId === vehicleId || vehicleId === 'all')
+        .map(alert => ({
+          description: alertMessages[alert.vehicleId], // Get description from alertMessages
+          vehicleId: alert.vehicleId
+        }));
+
+      const timestampFilteredAlerts = filteredAlerts.filter(alert => {
+        // Since we don't have timestamps in the alerts, we'll only filter based on free text
+        return alert.description.toLowerCase().includes(freeText);
+      });
+
+      displayAlerts(timestampFilteredAlerts);
+    }
+
+    function displayAlerts(alertsToDisplay) {
+      const alertsContainer = document.getElementById('alertsContainer');
+      alertsContainer.innerHTML = ''; // Clear previous alerts
+
+      alertsToDisplay.forEach((alert, index) => {
+        const alertDiv = document.createElement('div');
+        alertDiv.classList.add('alert');
+
+        const falseAlarmButton = document.createElement('button');
+        falseAlarmButton.textContent = 'Mark as False Alarm';
+        falseAlarmButton.onclick = function() {
+          markAsFalseAlarm(index);
+        };
+
+        alertDiv.textContent = alert.description; // Display alert information
+        alertDiv.appendChild(falseAlarmButton);
+        alertsContainer.appendChild(alertDiv);
+      });
+    }
+
+    function markAsFalseAlarm(index) {
+      // Update markedAsFalseAlarm status in the backend here...
+      searchAlerts(); // Refresh alerts after backend update (simulated)
+    }
+
+    // Function to simulate fetching vehicles and populate the dropdown
+    function fetchAndPopulateVehicles() {
+      // Simulating fetching vehicles (replace this with actual API fetch)
+      const vehicles = [
+        { id: '1', vehicle_friendly_name: 'Vehicle 1' },
+        { id: '2', vehicle_friendly_name: 'Vehicle 2' },
+        { id: '3', vehicle_friendly_name: 'Vehicle 3' }
+        // ... Add more vehicles here if needed
+      ];
+
+      const vehicleDropdown = document.getElementById('vehicleSearch');
+      const defaultOption = document.createElement('option');
+      defaultOption.value = 'all';
+      defaultOption.textContent = 'All Vehicles';
+      vehicleDropdown.appendChild(defaultOption);
+
+      vehicles.forEach(vehicle => {
+        const option = document.createElement('option');
+        option.value = vehicle.id;
+        option.textContent = vehicle.vehicle_friendly_name;
+        vehicleDropdown.appendChild(option);
+      });
+    }
+
+    // Initial population of vehicle dropdown on page load
+    fetchAndPopulateVehicles();
+  </script>
+</body>
+</html>
